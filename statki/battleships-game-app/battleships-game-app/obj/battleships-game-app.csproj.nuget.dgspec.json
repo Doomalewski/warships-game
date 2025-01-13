@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Desktop\\battleships-game-app\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj": {}
+    "C:\\statkiprojekt\\warships-game\\statki\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Desktop\\battleships-game-app\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj": {
+    "C:\\statkiprojekt\\warships-game\\statki\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Desktop\\battleships-game-app\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj",
+        "projectUniqueName": "C:\\statkiprojekt\\warships-game\\statki\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj",
         "projectName": "battleships-game-app",
-        "projectPath": "C:\\Users\\User\\Desktop\\battleships-game-app\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj",
+        "projectPath": "C:\\statkiprojekt\\warships-game\\statki\\battleships-game-app\\battleships-game-app\\battleships-game-app.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Desktop\\battleships-game-app\\battleships-game-app\\battleships-game-app\\obj\\",
+        "outputPath": "C:\\statkiprojekt\\warships-game\\statki\\battleships-game-app\\battleships-game-app\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

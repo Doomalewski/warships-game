@@ -12,6 +12,7 @@ namespace battleships_game_app.CellRelated
         public Position Position { get; private set; }
         public ICellState State { get; private set; }
         public  Icon IconManager { get; private set; }
+        public bool Visible { get; private set; }
 
         public Cell(Position pos,Icon iconManager)
         {
@@ -24,15 +25,29 @@ namespace battleships_game_app.CellRelated
         {
             State.Hit(this);
         }
-
+        public void SetVisibility(bool visible)
+        {
+            Visible = visible;
+        }
         public void Display(Cell context)
         {
-            State.Display(context);
+            if (Visible) {
+                State.Display(context);
+            }
+            else
+            {
+                Console.Write("~");
+            }
+
         }
 
         public void SetState(ICellState state)
         {
             State = state;
+        }
+        public void ToggleVisibility()
+        { 
+             Visible = !Visible; 
         }
     }
 }

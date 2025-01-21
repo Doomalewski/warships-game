@@ -54,5 +54,14 @@ namespace battleships_game_app.GameManagerRelated
             // Logika do określenia, czy gra jest przegrana (np. czy wszystkie statki zostały zatopione)
             return Fields.All(cell => cell.State is Sunk); // Sprawdzanie, czy każda komórka jest zatopiona
         }
+        // Metoda zmieniająca widoczność wszystkich pól NotHit na false
+        public void ToggleVisibility()
+        {
+            foreach (var cell in Fields.Where(cell => cell.State is NotHit))
+            {
+                cell.ToggleVisibility();
+            }
+        }
+
     }
 }

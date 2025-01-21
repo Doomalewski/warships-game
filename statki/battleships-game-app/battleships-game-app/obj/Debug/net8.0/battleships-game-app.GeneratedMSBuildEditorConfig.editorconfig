@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = battleships_game_app
-build_property.ProjectDir = C:\statkiprojekt\warships-game\statki\battleships-game-app\battleships-game-app\
+build_property.ProjectDir = C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

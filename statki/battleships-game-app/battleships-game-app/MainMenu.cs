@@ -79,17 +79,12 @@ namespace battleships_game_app
 
                     _gameManager.InitStandardGame(p1, p2);
 
-                    Console.WriteLine($"{p1.Name}, place your ships.");
-                    _gameManager.AddShips(p1);
+                    _gameManager.AddShips(p1,p2);
                     Console.Clear();
 
-                    Console.WriteLine($"{p2.Name}, place your ships.");
-                    _gameManager.AddShips(p2);
-                    Console.Clear();
-
-                    Console.WriteLine("Both players have placed their ships. Here is the initial board:");
                     _gameManager.PrintBoard();
-
+                    Console.WriteLine("Both players have placed their ships. Here is the initial board:");
+                    _gameManager.StartGameLoop();
                     Console.ReadLine();
                     break;
 

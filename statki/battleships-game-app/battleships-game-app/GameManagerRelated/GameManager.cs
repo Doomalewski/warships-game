@@ -3,9 +3,12 @@ using battleships_game_app.CommandRelated;
 using battleships_game_app.GameRelated;
 using battleships_game_app.WarshipFactoryRelated;
 using battleships_game_app.WarshipRelated;
+using Spectre.Console;
+using Spectre.Console.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,11 +23,6 @@ namespace battleships_game_app.GameManagerRelated
             Game = game;
         }
 
-        /// <summary>
-        /// Initializes the game with two players and sets up the board and game state.
-        /// </summary>
-        /// <param name="p1">First player</param>
-        /// <param name="p2">Second player</param>
         public void InitStandardGame(Player p1, Player p2)
         {
             if (p1 == null || p2 == null)
@@ -32,88 +30,81 @@ namespace battleships_game_app.GameManagerRelated
                 throw new ArgumentNullException("Both players must be provided.");
             }
 
-            // Initialize a standard game board
-            int boardWidth = 10; // Example board width
-            int boardHeight = 10; // Example board height
-            var board = new Board(boardWidth, boardHeight);
-            InitializeBoardCells(board);
+            int boardWidth = 10;
+            int boardHeight = 10;
+            var board1 = new Board(boardWidth, boardHeight);
+            var board2 = new Board(boardWidth, boardHeight);
 
-            // Create a new game instance
-            Game = new Game(p1, p2, board)
+            InitializeBoardCells(board1);
+            InitializeBoardCells(board2);
+
+
+            Game = new Game(p1, p2, board1, board2)
             {
                 GameHistory = new CommandInvoker(),
                 SavedStates = new Stack<BoardMemento>()
             };
 
-            // Notify players that the game is starting
-            NotifyPlayers(Game.player, Game.player2);
-
             Console.WriteLine("Game initialized successfully.");
         }
 
-        /// <summary>
-        /// Initializes the cells on the board with default settings.
-        /// </summary>
-        /// <param name="board">The game board to initialize</param>
         private void InitializeBoardCells(Board board)
         {
             if (board == null)
                 throw new ArgumentNullException(nameof(board));
 
-            board.Fields.Clear(); // Clear the existing fields
+            board.Fields.Clear();
 
             for (int i = 0; i < board.Width; i++)
             {
                 for (int j = 0; j < board.Height; j++)
                 {
-                    var position = new Position(i, j); // Pozycja komórki
-                    var iconManager = new Icon(); // Manager ikon dla wizualizacji
-                    var cell = new Cell(position, iconManager); // Tworzenie komórki bez Id
+                    var position = new Position(i, j);
+                    var iconManager = new Icon();
+                    var cell = new Cell(position, iconManager);
                     cell.SetState(new Neutral());
-                    board.Fields.Add(cell); // Dodanie komórki do planszy
+                    cell.SetVisibility(true);
+                    board.Fields.Add(cell);
                 }
             }
 
             Console.WriteLine($"Board initialized with {board.Fields.Count} cells.");
         }
 
-        /// <summary>
-        /// Prints the current state of the game board.
-        /// </summary>
         public void PrintBoard()
         {
-            if (Game.board == null || Game.board.Fields == null)
+            if (Game.CurrentBoard == null || Game.CurrentBoard.Fields == null)
             {
                 Console.WriteLine("Board is not initialized.");
                 return;
             }
-
-            Console.Clear(); // Clear the console before displaying the board
+            Console.Clear();
             Console.WriteLine("Current Board:");
 
             // Column headers (A, B, C, ...)
             Console.Write("   "); // Offset for row numbers
-            for (int col = 0; col < Game.board.Width; col++)
+            for (int col = 0; col < Game.CurrentBoard.Width; col++)
             {
                 Console.Write($" {Convert.ToChar('A' + col)} ");
             }
             Console.WriteLine();
 
             // Draw the board
-            for (int row = 0; row < Game.board.Height; row++)
+            for (int row = 0; row < Game.CurrentBoard.Height; row++)
             {
                 // Row number (1, 2, 3, ...)
                 Console.Write($"{row + 1,2} ");
 
-                for (int col = 0; col < Game.board.Width; col++)
+                for (int col = 0; col < Game.CurrentBoard.Width; col++)
                 {
                     // Get the cell based on its position
-                    var cell = Game.board.Fields.FirstOrDefault(c => c.Position.X == row && c.Position.Y == col);
+                    var cell = Game.CurrentBoard.Fields.FirstOrDefault(c => c.Position.X == row && c.Position.Y == col);
 
                     if (cell != null)
                     {
-                        // Display the icon of the cell
-                        Console.Write($" {cell.IconManager.GetIconForState(cell.State)} ");
+                        Console.Write(" "); // Add space between cells for better readability
+                        cell.Display(cell);
+                        Console.Write(" "); // Add space between cells for better readability
                     }
                     else
                     {
@@ -128,24 +119,69 @@ namespace battleships_game_app.GameManagerRelated
             Console.WriteLine(); // Empty line at the end of the board
         }
 
-        /// <summary>
-        /// Notifies players that the game has started.
-        /// </summary>
-        /// <param name="player1">First player</param>
-        /// <param name="player2">Second player</param>
-        private void NotifyPlayers(Player player1, Player player2)
+        public void PrintBoardNoClear()
         {
-            Console.WriteLine($"Player 1 ({player1.Name}) and Player 2 ({player2.Name}) are ready.");
-            Console.WriteLine("Let the battle begin!");
+            if (Game.CurrentBoard == null || Game.CurrentBoard.Fields == null)
+            {
+                Console.WriteLine("Board is not initialized.");
+                return;
+            }
+            Console.WriteLine("Current Board:");
+
+            // Column headers (A, B, C, ...)
+            Console.Write("   "); // Offset for row numbers
+            for (int col = 0; col < Game.CurrentBoard.Width; col++)
+            {
+                Console.Write($" {Convert.ToChar('A' + col)} ");
+            }
+            Console.WriteLine();
+
+            // Draw the board
+            for (int row = 0; row < Game.CurrentBoard.Height; row++)
+            {
+                // Row number (1, 2, 3, ...)
+                Console.Write($"{row + 1,2} ");
+
+                for (int col = 0; col < Game.CurrentBoard.Width; col++)
+                {
+                    // Get the cell based on its position
+                    var cell = Game.CurrentBoard.Fields.FirstOrDefault(c => c.Position.X == row && c.Position.Y == col);
+
+                    if (cell != null)
+                    {
+                        // Display the icon of the cell
+                        Console.Write(" "); // Add space between cells for better readability
+                        cell.Display(cell);
+                        Console.Write(" "); // Add space between cells for better readability
+                    }
+                    else
+                    {
+                        // If no cell, use default symbol
+                        Console.Write(" ~ ");
+                    }
+                }
+
+                Console.WriteLine(); // New line after each row
+            }
+
+            Console.WriteLine(); // Empty line at the end of the board
+        }
+        public void AddShips(Player player1, Player player2)
+        {
+            Console.WriteLine($"Player {player1.Name}, set up your ships on board.");
+            AddShipsForPlayer(player1, Game.Board1);
+
+            Console.WriteLine($"Player {player2.Name}, set up your ships on board.");
+            AddShipsForPlayer(player2, Game.Board2);
         }
 
-        public void AddShips(Player player)
+        private void AddShipsForPlayer(Player player, Board board)
         {
-            Console.WriteLine($"Adding ships for player: {player.Name}");
-
+            Game.CurrentBoard = board; 
             while (true)
             {
                 PrintBoard();
+                //displayShips(player);
                 Console.WriteLine("Enter starting position (e.g., A1) or type 'done' to finish:");
                 var positionInput = Console.ReadLine();
 
@@ -166,7 +202,7 @@ namespace battleships_game_app.GameManagerRelated
                 }
 
                 var factory = new StandardShipFactory(length);
-                var ship = (StandardShip)factory.CreateWarship(Game.board,startPosition);
+                var ship = (StandardShip)factory.CreateWarship(board, startPosition);
                 bool shipPlaced = false;
 
                 while (!shipPlaced)
@@ -198,11 +234,12 @@ namespace battleships_game_app.GameManagerRelated
                             break;
 
                         case ConsoleKey.P:
-                            if (CanPlaceShip(ship, Game.board))
+                            if (CanPlaceShip(ship, board))
                             {
-                                PlaceShipOnBoard(ship, Game.board);
+                                PlaceShipOnBoard(ship, board);
                                 Console.WriteLine("Ship placed.");
                                 shipPlaced = true;
+                                player.Ships.Add(ship);
                             }
                             else
                             {
@@ -212,7 +249,7 @@ namespace battleships_game_app.GameManagerRelated
 
                         case ConsoleKey.C:
                             Console.WriteLine("Cancelled ship placement.");
-                            ship.Destroy(Game.board);
+                            ship.Destroy(board);
                             return;
 
                         default:
@@ -222,6 +259,7 @@ namespace battleships_game_app.GameManagerRelated
                 }
             }
         }
+
 
         private void TryMoveShip(Warship ship, int deltaX, int deltaY)
         {
@@ -248,26 +286,6 @@ namespace battleships_game_app.GameManagerRelated
                 Console.WriteLine($"Cannot rotate ship: {ex.Message}");
             }
         }
-
-
-        private List<Cell> GetShipCells(StandardShip ship)
-        {
-            List<Cell> cells = new List<Cell>();
-            foreach (var cell in ship.GetBody())
-            {
-                var boardCell = Game.board.GetCell(cell.Position);
-                if (boardCell != null)
-                {
-                    cells.Add(boardCell);
-                }
-            }
-            return cells;
-        }
-
-
-
-
-
         private bool CanPlaceShip(IWarship ship, Board board)
         {
             var temporaryPositions = ship.GetBody().Select(cell => cell.Position).ToHashSet();
@@ -292,8 +310,6 @@ namespace battleships_game_app.GameManagerRelated
 
             return true;
         }
-
-
         private void PlaceShipOnBoard(IWarship ship, Board board)
         {
             foreach (var cell in ship.GetBody())
@@ -323,6 +339,61 @@ namespace battleships_game_app.GameManagerRelated
 
             position = new Position(row - 1, char.ToUpper(column) - 'A');
             return true;
+        }
+        private void displayShips(Player player)
+        {
+            foreach(var ship in player.Ships)
+            {
+                ship.DisplayInfo();
+            }
+        }
+        public void StartGameLoop()
+        {
+            Console.Clear();
+            AnsiConsole.Write(new Rule("[green bold]ALL SHIPS HAVE BEEN PLACED![/]").RuleStyle("yellow").Centered());
+            Thread.Sleep(3000);
+
+            Console.Clear();
+            AnsiConsole.Write(new Rule("[red bold]LET THE WAR BEGIN![/]").RuleStyle("yellow").Centered());
+            Thread.Sleep(3000);
+            while (true)
+            {
+                if (CheckIfLost(Game.player1))
+                {
+                    Console.WriteLine($"{Game.player2.Name} wins!");
+                    break;
+                }
+
+                if (CheckIfLost(Game.player2))
+                {
+                    Console.WriteLine($"{Game.player1.Name} wins!");
+                    break;
+                }
+                ShotDisplayp1();
+            }
+            
+        }
+
+        private bool CheckIfLost(Player player)
+        {
+            return player.Ships.All(ship => ship.GetBody().All(cell => cell.State is WasHit));
+        }
+        private void ShotDisplayp1()
+        {
+            Console.Clear();
+            AnsiConsole.Write(new Rule("[blue bold]YOUR SEA...[/]").RuleStyle("yellow").Centered());
+            Console.WriteLine();
+
+            Game.CurrentBoard = Game.Board1;
+            PrintBoardNoClear();
+            Game.Board2.ToggleVisibility();
+
+            Game.CurrentBoard = Game.Board2;
+            AnsiConsole.Write(new Rule("[red bold]ENEMIES SEA...[/]").RuleStyle("blue").Centered());
+            Console.WriteLine();
+            PrintBoardNoClear();
+            Game.Board2.ToggleVisibility();
+            Console.ReadKey();
         }
     }
 }

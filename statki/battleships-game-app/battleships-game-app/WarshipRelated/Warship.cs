@@ -192,5 +192,21 @@ namespace battleships_game_app.WarshipRelated
                 throw new InvalidOperationException("Cannot set new start position: " + ex.Message);
             }
         }
+
+        public void Destroy(Board board)
+        {
+            RemoveOldCells();
+            Console.WriteLine("Ship destroyed and cells reset to neutral.");
+        }
+        public void DisplayInfo()
+        {
+            Console.WriteLine($"Ship Type: {this.GetType().Name}");
+            Console.WriteLine("Ship Cells:");
+            foreach (var cell in Body)
+            {
+                Console.WriteLine($" - Position: ({cell.Position.X}, {cell.Position.Y})");
+            }
+            Console.WriteLine();
+        }
     }
 }

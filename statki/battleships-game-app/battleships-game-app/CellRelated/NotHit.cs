@@ -10,7 +10,7 @@ namespace battleships_game_app.CellRelated
     {
         public void Hit(Cell context)
         {
-            Console.WriteLine("Cell has been hit.");
+            Console.WriteLine("Warhip Hit!");
             context.SetState(new WasHit());
         }
 

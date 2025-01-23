@@ -44,5 +44,9 @@ namespace battleships_game_app.CommandRelated
             commandToRedo.Execute();                    // Wykonaj je ponownie
             _executedCommands.Push(commandToRedo);      // Dodaj z powrotem do stosu wykonanych
         }
+        public bool HasCommands()
+        {
+            return _executedCommands.Count > 0;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace battleships_game_app.CellRelated
     {
         public void Hit(Cell context)
         {
-            Console.WriteLine("Water was already hit!");
+            Console.WriteLine("You have shot here already!");
         }
 
         public void Display(Cell context)

@@ -22,12 +22,14 @@ namespace battleships_game_app.CommandRelated
         public void Execute()
         {
             // Znajdź komórkę na planszy na podstawie pozycji
-            targetCell = board.Fields.FirstOrDefault(cell => cell.Position.Equals(position));
-
+            var targetCell = board.Fields.FirstOrDefault(cell =>
+                cell.Position.X == position.X && cell.Position.Y == position.Y);
             if (targetCell == null)
             {
                 throw new InvalidOperationException("Invalid position: Cell not found.");
             }
+            this.targetCell = targetCell;
+
 
             // Zapamiętaj poprzedni stan komórki
             previousState = targetCell.State;

@@ -30,8 +30,8 @@ namespace battleships_game_app.GameManagerRelated
                 throw new ArgumentNullException("Both players must be provided.");
             }
 
-            int boardWidth = 10;
-            int boardHeight = 10;
+            int boardWidth = 6;
+            int boardHeight = 6;
             var board1 = new Board(boardWidth, boardHeight);
             var board2 = new Board(boardWidth, boardHeight);
 
@@ -351,49 +351,215 @@ namespace battleships_game_app.GameManagerRelated
         {
             Console.Clear();
             AnsiConsole.Write(new Rule("[green bold]ALL SHIPS HAVE BEEN PLACED![/]").RuleStyle("yellow").Centered());
-            Thread.Sleep(3000);
-
             Console.Clear();
             AnsiConsole.Write(new Rule("[red bold]LET THE WAR BEGIN![/]").RuleStyle("yellow").Centered());
-            Thread.Sleep(3000);
+
+            bool undoTriggered = false; // Flaga wskazująca, czy wykonano undo
+            Player currentPlayer = Game.player1; // Rozpoczyna pierwszy gracz
+
             while (true)
             {
-                if (CheckIfLost(Game.player1))
+                // Wyświetl plansze i wykonaj strzał tylko, jeśli nie wykonano undo
+                if (!undoTriggered)
                 {
-                    Console.WriteLine($"{Game.player2.Name} wins!");
+                    ShotDisplay(currentPlayer);
+                }
+
+                // Sprawdź, czy przeciwnik przegrał
+                Player opponent = currentPlayer == Game.player1 ? Game.player2 : Game.player1;
+                if (CheckIfLost(opponent))
+                {
+                    Console.WriteLine($"{currentPlayer.Name} wins!");
                     break;
                 }
 
-                if (CheckIfLost(Game.player2))
+                Console.WriteLine("Press 'X' to undo your last move or any other key to end turn:");
+                var keyInfo = Console.ReadKey(intercept: true);
+
+                if (keyInfo.Key == ConsoleKey.X)
                 {
-                    Console.WriteLine($"{Game.player1.Name} wins!");
-                    break;
+                    if (Game.GameHistory.HasCommands())
+                    {
+                        UndoLastMove(currentPlayer);
+                        undoTriggered = true; // Zaznacz, że undo zostało wykonane
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nNo moves to undo.");
+                        undoTriggered = false; // Nie zmieniaj gracza
+                    }
                 }
-                ShotDisplayp1();
+                else
+                {
+                    undoTriggered = false; // Cofnięcie wyłączone, kontynuuj grę
+                    currentPlayer = opponent; // Zmień gracza
+                }
             }
-            
         }
 
+        private Position AskForPosition()
+        {
+            // Słownik mapujący litery na indeksy
+            Dictionary<char, int> columnMapping = new Dictionary<char, int>();
+            for (int i = 0; i < 20; i++)
+            {
+                columnMapping.Add((char)('A' + i), i);
+            }
+
+            while (true)
+            {
+                Console.WriteLine("Enter position (e.g., A1):");
+                string input = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(input) || input.Length < 2)
+                {
+                    Console.WriteLine("Invalid input. Please try again.");
+                    continue;
+                }
+
+                char column = char.ToUpper(input[0]); // Pobierz pierwszą literę i zamień na wielką literę
+                string rowString = input.Substring(1); // Reszta wejścia to numer wiersza
+
+                if (!columnMapping.ContainsKey(column))
+                {
+                    Console.WriteLine("Invalid column. Please use letters (A-J).");
+                    continue;
+                }
+
+                if (!int.TryParse(rowString, out int row) || row < 1)
+                {
+                    Console.WriteLine("Invalid row. Please use numbers (1-10).");
+                    continue;
+                }
+
+                int x = row - 1; // Indeks wiersza (0-based)
+                int y = columnMapping[column]; // Pobierz indeks kolumny z mapowania
+
+                if (x < 0 || x >= Game.CurrentBoard.Height) // Sprawdzenie, czy wiersz mieści się w granicach planszy
+                {
+                    Console.WriteLine($"Invalid row. Please use numbers (1-{Game.CurrentBoard.Height}).");
+                    continue;
+                }
+
+                if (y < 0 || y >= Game.CurrentBoard.Width) // Sprawdzenie, czy kolumna mieści się w granicach planszy
+                {
+                    Console.WriteLine($"Invalid column. Please use letters within the range (A-{(char)('A' + Game.CurrentBoard.Width - 1)}).");
+                    continue;
+                }
+
+                return new Position(x, y); // Zwracamy poprawną pozycję
+            }
+        }
         private bool CheckIfLost(Player player)
         {
             return player.Ships.All(ship => ship.GetBody().All(cell => cell.State is WasHit));
         }
-        private void ShotDisplayp1()
+        private void ShotDisplay(Player currentPlayer)
         {
-            Console.Clear();
-            AnsiConsole.Write(new Rule("[blue bold]YOUR SEA...[/]").RuleStyle("yellow").Centered());
-            Console.WriteLine();
+            while (true)
+            {
+                Console.Clear();
 
-            Game.CurrentBoard = Game.Board1;
-            PrintBoardNoClear();
-            Game.Board2.ToggleVisibility();
+                // Ustawienie plansz na podstawie bieżącego gracza
+                Board playerBoard = currentPlayer == Game.player1 ? Game.Board1 : Game.Board2;
+                Board enemyBoard = currentPlayer == Game.player1 ? Game.Board2 : Game.Board1;
 
-            Game.CurrentBoard = Game.Board2;
-            AnsiConsole.Write(new Rule("[red bold]ENEMIES SEA...[/]").RuleStyle("blue").Centered());
-            Console.WriteLine();
-            PrintBoardNoClear();
-            Game.Board2.ToggleVisibility();
-            Console.ReadKey();
+                // Wyświetlenie planszy gracza
+                AnsiConsole.Write(new Rule("[blue bold]YOUR SEA...[/]").RuleStyle("yellow").Centered());
+                Console.WriteLine();
+                Game.CurrentBoard = playerBoard;
+                PrintBoardNoClear();
+
+                // Wyświetlenie planszy przeciwnika
+                enemyBoard.ToggleVisibility();
+                AnsiConsole.Write(new Rule("[red bold]ENEMIES SEA...[/]").RuleStyle("blue").Centered());
+                Console.WriteLine();
+                Game.CurrentBoard = enemyBoard;
+                PrintBoardNoClear();
+                enemyBoard.ToggleVisibility();
+
+                // Wykonanie ruchu
+                Shoot(currentPlayer);
+                break; // Wyjście z pętli po wykonaniu strzału
+            }
         }
+
+
+        private void Shoot(Player player)
+        {
+            Position desiredShotPosition = AskForPosition();
+
+            // Ustawienie planszy przeciwnika
+            Board enemyBoard = player == Game.player1 ? Game.Board2 : Game.Board1;
+
+            try
+            {
+                // Tworzenie komendy FireCommand
+                FireCommand fireCommand = new FireCommand(enemyBoard, desiredShotPosition, player);
+
+                // Dodanie komendy do historii gry
+                Game.GameHistory.ExecuteCommand(fireCommand);
+
+                // Obsługa trafienia lub pudła
+                if (fireCommand.WasHit())
+                {
+                    Console.WriteLine("You hit a ship!");
+                }
+                else
+                {
+                    Console.WriteLine("You missed.");
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+
+        private void HandleUndoMove(Player currentPlayer)
+        {
+            Console.WriteLine("Press 'X' to undo your last move or any other key to continue:");
+
+            // Odczytaj klawisz od użytkownika
+            ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
+
+            if (keyInfo.Key == ConsoleKey.X)
+            {
+                UndoLastMove(currentPlayer);
+            }
+            else
+            {
+                Console.WriteLine("\nContinuing the game...");
+            }
+        }
+
+        private void UndoLastMove(Player currentPlayer)
+        {
+            if (Game.GameHistory.HasCommands())
+            {
+                try
+                {
+                    // Cofnij ostatnią komendę
+                    Game.GameHistory.UndoCommand();
+                    Console.WriteLine("Last move has been undone.");
+
+                    // Powtórz ruch tego samego gracza
+                    ShotDisplay(currentPlayer);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine($"Undo failed: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No moves to undo.");
+            }
+        }
+
+
+
+
     }
 }

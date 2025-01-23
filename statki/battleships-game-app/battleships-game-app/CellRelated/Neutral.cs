@@ -10,7 +10,7 @@ namespace battleships_game_app.CellRelated
     {
         public void Hit(Cell context)
         {
-            Console.WriteLine("Neutral cell hit.");
+            Console.WriteLine("Miss! Neutral cell hit.");
             context.SetState(new HitWater());
         }
 

@@ -174,14 +174,69 @@ namespace battleships_game_app.GameManagerRelated
             Console.WriteLine($"Player {player2.Name}, set up your ships on board.");
             AddShipsForPlayer(player2, Game.Board2);
         }
+        public void AddShipsForComputerGame(Player player1, Player player2)
+        {
+            Console.WriteLine($"Player {player1.Name}, set up your ships on board.");
+            AddShipsForPlayer(player1, Game.Board1);
 
+            AddShipsForComputer(player2, Game.Board2);
+        }
+        private void AddShipsForComputer(Player player,Board board)
+        {
+                Game.CurrentBoard = board;
+
+                Random random = new Random();
+                int[] shipLengths = { 2, 3, 3 }; // Długości statków do ustawienia
+
+                foreach (int length in shipLengths)
+                {
+                    bool shipPlaced = false;
+
+                    while (!shipPlaced)
+                    {
+                        // Generowanie losowej pozycji startowej
+                        int startRow = random.Next(0, board.Height);
+                        int startCol = random.Next(0, board.Width);
+
+                        // Losowa orientacja statku: true = pozioma, false = pionowa
+                        bool isHorizontal = random.Next(0, 2) == 0;
+
+                        // Tworzenie statku
+                        var startPosition = new Position(startRow, startCol);
+                        var factory = new StandardShipFactory(length);
+                        var ship = (StandardShip)factory.CreateWarship(board, startPosition);
+                        RotateShip(ship);
+                        RotateShip(ship);
+
+                    // Ustawienie orientacji statku
+                    if (!isHorizontal)
+                        {
+                            RotateShip(ship);
+                        }
+
+                        // Sprawdzanie możliwości ustawienia statku na planszy
+                        if (CanPlaceShip(ship, board))
+                        {
+                            PlaceShipOnBoard(ship, board);
+                            Console.WriteLine($"Placed ship of length {length} at ({startRow}, {startCol}) {(isHorizontal ? "horizontally" : "vertically")}.");
+                            shipPlaced = true;
+                            player.Ships.Add(ship);
+                        }
+                        else
+                        {
+                            // Zniszczenie statku, jeśli nie można go ustawić
+                            ship.Destroy(board);
+                        }
+                    }
+            }
+
+        }
         private void AddShipsForPlayer(Player player, Board board)
         {
             Game.CurrentBoard = board; 
             while (true)
             {
                 PrintBoard();
-                //displayShips(player);
                 Console.WriteLine("Enter starting position (e.g., A1) or type 'done' to finish:");
                 var positionInput = Console.ReadLine();
 
@@ -203,6 +258,8 @@ namespace battleships_game_app.GameManagerRelated
 
                 var factory = new StandardShipFactory(length);
                 var ship = (StandardShip)factory.CreateWarship(board, startPosition);
+                RotateShip(ship);
+                RotateShip(ship);
                 bool shipPlaced = false;
 
                 while (!shipPlaced)
@@ -558,8 +615,130 @@ namespace battleships_game_app.GameManagerRelated
             }
         }
 
+        public void InitGameVsPc(Player p1, Player computer)
+        {
+                if (p1 == null)
+                {
+                    throw new ArgumentNullException("Both players must be provided.");
+                }
 
+                int boardWidth = 6;
+                int boardHeight = 6;
+                var board1 = new Board(boardWidth, boardHeight);
+                var board2 = new Board(boardWidth, boardHeight);
 
+                InitializeBoardCells(board1);
+                InitializeBoardCells(board2);
 
+                Game = new Game(p1, computer, board1, board2)
+                {
+                    GameHistory = new CommandInvoker(),
+                    SavedStates = new Stack<BoardMemento>()
+                };
+
+                Console.WriteLine("Game initialized successfully.");
+        }
+        public void StartGameLoopVsPc()
+        {
+            Console.Clear();
+            AnsiConsole.Write(new Rule("[green bold]ALL SHIPS HAVE BEEN PLACED![/]").RuleStyle("yellow").Centered());
+            AnsiConsole.Write(new Rule("[red bold]LET THE WAR BEGIN![/]").RuleStyle("yellow").Centered());
+
+            bool undoTriggered = false;
+            Player humanPlayer = Game.player1;
+            Player computerPlayer = Game.player2; // Gracz reprezentujący komputer
+            Player currentPlayer = humanPlayer;
+
+            Console.WriteLine("Choose difficulty level for the computer: (1) Easy, (2) Medium, (3) Hard");
+            int difficulty;
+            while (!int.TryParse(Console.ReadLine(), out difficulty) || difficulty < 1 || difficulty > 3)
+            {
+                Console.WriteLine("Invalid choice. Please enter 1, 2, or 3:");
+            }
+
+            while (true)
+            {
+                // Wyświetlenie planszy i wykonanie strzału, jeśli nie cofnięto ruchu
+                if (!undoTriggered && currentPlayer == humanPlayer)
+                {
+                    ShotDisplay(humanPlayer);
+                }
+
+                Player opponent = currentPlayer == humanPlayer ? computerPlayer : humanPlayer;
+
+                // Sprawdzenie, czy przeciwnik przegrał
+                if (CheckIfLost(opponent))
+                {
+                    Console.WriteLine($"{currentPlayer.Name} wins!");
+                    break;
+                }
+
+                // Kolejka komputera
+                if (currentPlayer == computerPlayer)
+                {
+                    Console.WriteLine("\nComputer's turn...");
+                    PerformComputerMove(computerPlayer, Game.Board1, difficulty);
+                    currentPlayer = humanPlayer; // Powrót do gracza
+                }
+                else
+                {
+                    Console.WriteLine("Press 'X' to undo your last move or any other key to end turn:");
+                    var keyInfo = Console.ReadKey(intercept: true);
+
+                    if (keyInfo.Key == ConsoleKey.X)
+                    {
+                        if (Game.GameHistory.HasCommands())
+                        {
+                            UndoLastMove(humanPlayer);
+                            undoTriggered = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nNo moves to undo.");
+                            undoTriggered = false;
+                        }
+                    }
+                    else
+                    {
+                        undoTriggered = false;
+                        currentPlayer = computerPlayer;
+                    }
+                }
+            }
+        }
+
+        private void PerformComputerMove(Player computer, Board opponentBoard, int difficulty)
+        {
+            Random random = new Random();
+            Position shot;
+
+            switch (difficulty)
+            {
+                case 1:
+                    var CellToHit = opponentBoard.GetRandomCell();
+                    DirectShoot(CellToHit.Position);
+                    break;
+
+                case 2:
+                    var CellToHit2 = opponentBoard.GetCellWithBias30To70();
+                    DirectShoot(CellToHit2.Position);
+                    break;
+
+                case 3:
+                    var CellToHit3 = opponentBoard.GetCellWithBias50To50();
+                    DirectShoot(CellToHit3.Position);
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Invalid difficulty level.");
+            }
+        }
+        private void DirectShoot(Position targetPosition)
+        {
+            // Ustawienie planszy przeciwnika
+            Board enemyBoard = Game.Board1;
+            var CellToHit = Game.Board1.GetCell(targetPosition);
+            CellToHit.Hit();
+        }
     }
 }

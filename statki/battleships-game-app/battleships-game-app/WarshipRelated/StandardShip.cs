@@ -14,7 +14,7 @@ public class StandardShip : Warship
         _isHorizontal = isHorizontal;
 
         // Update the ship's body based on the start position and orientation
-        UpdateBody();
+        //UpdateBody();
     }
 
 }

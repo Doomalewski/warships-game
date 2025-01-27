@@ -85,17 +85,27 @@ namespace battleships_game_app
                     _gameManager.PrintBoard();
                     Console.WriteLine("Both players have placed their ships. Here is the initial board:");
                     _gameManager.StartGameLoop();
+                    Console.WriteLine("Type anything to finish");
                     Console.ReadLine();
                     break;
 
 
                 case "Player vs AI":
                     Console.WriteLine("Enter your name:");
-                    string playerName = Console.ReadLine();
+                    string player1Name = Console.ReadLine();
 
-                    Player player = new Player(playerName, false);
-                    //_gameManager.InitAIGame(player);
+                    Player player1 = new Player(player1Name, false);
+                    Player computer = new Player("computer", false);
+
+                    _gameManager.InitGameVsPc(player1,computer);
+                    _gameManager.AddShipsForComputerGame(player1, computer);
                     _gameManager.PrintBoard();
+                    Console.WriteLine("Both players have placed their ships. Here is the initial board:");
+                    _gameManager.StartGameLoopVsPc();
+                    Console.WriteLine("Type anything to finish");
+                    Console.ReadLine();
+                    Console.Clear();
+
                     break;
 
                 case "Back":

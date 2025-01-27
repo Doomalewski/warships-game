@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("battleships-game-app")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7c0b628b7e7c191890b6b4478622155bdc36753b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+47575e6c8d6f6ca1579c3e6cafa4304dad34cbdc")]
 [assembly: System.Reflection.AssemblyProductAttribute("battleships-game-app")]
 [assembly: System.Reflection.AssemblyTitleAttribute("battleships-game-app")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

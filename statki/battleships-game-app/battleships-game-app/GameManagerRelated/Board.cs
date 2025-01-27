@@ -62,6 +62,62 @@ namespace battleships_game_app.GameManagerRelated
                 cell.ToggleVisibility();
             }
         }
+        public Cell GetRandomCell()
+        {
+            var random = new Random();
+            int index = random.Next(Fields.Count);
+            return Fields[index];
+        }
+        public Cell GetCellWithBias30To70()
+        {
+            var random = new Random();
+            double chance = random.NextDouble(); // Losuje liczbę z zakresu 0-1
+
+            if (chance <= 0.3)
+            {
+                var notHitCells = Fields.Where(cell => cell.State is NotHit).ToList();
+                if (notHitCells.Any())
+                {
+                    int index = random.Next(notHitCells.Count);
+                    return notHitCells[index];
+                }
+            }
+
+            var neutralCells = Fields.Where(cell => cell.State is Neutral).ToList();
+            if (neutralCells.Any())
+            {
+                int index = random.Next(neutralCells.Count);
+                return neutralCells[index];
+            }
+
+            // Jeśli żadna z powyższych, zwróć dowolną losową komórkę
+            return GetRandomCell();
+        }
+        public Cell GetCellWithBias50To50()
+        {
+            var random = new Random();
+            double chance = random.NextDouble(); // Losuje liczbę z zakresu 0-1
+
+            if (chance <= 0.5)
+            {
+                var notHitCells = Fields.Where(cell => cell.State is NotHit).ToList();
+                if (notHitCells.Any())
+                {
+                    int index = random.Next(notHitCells.Count);
+                    return notHitCells[index];
+                }
+            }
+
+            var neutralCells = Fields.Where(cell => cell.State is Neutral).ToList();
+            if (neutralCells.Any())
+            {
+                int index = random.Next(neutralCells.Count);
+                return neutralCells[index];
+            }
+
+            // Jeśli żadna z powyższych, zwróć dowolną losową komórkę
+            return GetRandomCell();
+        }
 
     }
 }

@@ -60,3 +60,15 @@ C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleshi
 C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\obj\Debug\net8.0\battleships-game-app.pdb
 C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\obj\Debug\net8.0\battleships-game-app.genruntimeconfig.cache
 C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\obj\Debug\net8.0\ref\battleships-game-app.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.Configuration.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Abstractions.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.Configuration.FileExtensions.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Json.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.FileProviders.Physical.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.FileSystemGlobbing.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\System.IO.Pipelines.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\System.Text.Encodings.Web.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\System.Text.Json.dll
+C:\Users\User\Desktop\statki\warships-game\statki\battleships-game-app\battleships-game-app\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll

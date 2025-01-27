@@ -16,7 +16,7 @@ namespace battleships_game_app.GameRelated
         public Board Board1 { get; set; }
         public Board Board2 { get; set; }
         public Board CurrentBoard { get; set; }
-
+        public int? Hardeness {  get; set; }
         public bool? winner { get; set; }
         public CommandInvoker GameHistory;
         public Stack<BoardMemento> SavedStates;
@@ -28,6 +28,7 @@ namespace battleships_game_app.GameRelated
             this.Board2 = board2;
             this.CurrentBoard = board2;
             winner = null;
+            Hardeness = null;
         }
 
     }

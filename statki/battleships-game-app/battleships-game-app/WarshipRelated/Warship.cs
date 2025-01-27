@@ -155,18 +155,26 @@ namespace battleships_game_app.WarshipRelated
                 int x = _startPosition.X + (_isHorizontal ? 0 : i);
                 int y = _startPosition.Y + (_isHorizontal ? i : 0);
 
+                // Sprawdzenie, czy pozycja znajduje się w granicach planszy
+                if (x < 0 || x >= WarshipBoard.Width || y < 0 || y >= WarshipBoard.Height)
+                {
+                    throw new InvalidOperationException($"Cannot place ship: position ({x}, {y}) is out of board bounds.");
+                }
+
                 var position = new Position(x, y);
                 var boardCell = WarshipBoard.GetCell(position);
 
+                // Sprawdzenie, czy komórka jest dostępna
                 if (boardCell == null || !(boardCell.State is Neutral))
                 {
-                    throw new InvalidOperationException("Cannot place ship: position is invalid or occupied.");
+                    throw new InvalidOperationException($"Cannot place ship: position ({x}, {y}) is invalid or occupied.");
                 }
 
                 Body.Add(boardCell);
                 boardCell.SetState(new NotHit()); // Ustaw stan komórki na zajętą przez statek
             }
         }
+
 
         public void RemoveOldCells()
         {
